@@ -1,0 +1,236 @@
+//Trabajo de Jolver Aeropuertos. 
+
+CREATE DATABASE trabajoAeropuerto;
+
+//tabla país
+CREATE TABLE pais(
+	id_pais VARCHAR(5) NOT NULL,
+	nombre_pais VARCHAR(30) NOT NULL,
+	PRIMARY KEY(id_pais)
+);
+
+//tabla ciudad
+
+CREATE TABLE ciudad(
+	id_ciudad VARCHAR(5) NOT NULL,
+	nombre_ciudad  VARCHAR(30) NOT NULL,
+	pais_ciudad VARCHAR(5) NOT NULL,
+	PRIMARY KEY (id_ciudad),
+	FOREIGN KEY (pais_ciudad) REFERENCES pais (id_pais)
+);
+
+//tabla aeropuerto
+
+CREATE TABLE aeropuerto(
+	id_aeropuerto VARCHAR(5) NOT NULL,
+	nombre_aeropuerto VARCHAR(50) NOT NULL,
+	ciudad_aeropuerto VARCHAR(5) NOT NULL,
+	PRIMARY KEY(id_aeropuerto),
+	FOREIGN KEY (ciudad_aeropuerto) REFERENCES ciudad (id_ciudad)
+);
+
+//tabala gates
+
+CREATE TABLE gates(
+	id_gate VARCHAR(5) NOT NULL,
+	nro_puerta INT NOT NULL,
+	aeropuerto_gate VARCHAR(5) NOT NULL,
+	PRIMARY KEY(id_gate),
+	FOREIGN KEY (aeropuerto_gate) REFERENCES aeropuerto (id_aeropuerto)
+);
+
+//tabla trayecto 
+
+CREATE TABLE trayectos(
+	id_trayecto INT NOT NULL AUTO_INCREMENT,
+	fecha_trayecto DATE NOT NULL,
+	valor DOUBLE NOT NULL,
+	ciudad_origen VARCHAR(5) NOT NULL,
+	ciudad_destino VARCHAR(5) NOT NULL,
+	PRIMARY KEY (id_trayecto),
+	FOREIGN KEY (ciudad_origen) REFERENCES ciudad (id_ciudad),
+	FOREIGN KEY (ciudad_destino) REFERENCES ciudad (id_ciudad)
+);
+
+
+//tabla fabricante 
+
+CREATE TABLE fabricantes (
+    id_fabricante INT NOT NULL AUTO_INCREMENT,
+    nombre_fabricante VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id_fabricante)
+);
+
+//tabala modelo.
+
+CREATE TABLE modelos(
+	id_modelo INT NOT NULL AUTO_INCREMENT,
+	nombre_modelo VARCHAR(30) NOT NULL,
+	fabricante_modelo INT NOT NULL,
+	PRIMARY KEY(id_modelo),
+	FOREIGN KEY (fabricante_modelo) REFERENCES fabricantes (id_fabricante)
+);
+
+//tabla estado
+
+CREATE TABLE estado(
+	id_estado INT NOT NULL AUTO_INCREMENT,
+	nombre_estado VARCHAR(30) NOT NULL,
+	PRIMARY KEY (id_estado)
+);
+
+
+//tabla aerolínea
+
+CREATE TABLE aerolineas(
+	id_aerolinea INT NOT NULL AUTO_INCREMENT,
+	nombre_aerolinea VARCHAR(30) NOT NULL,
+	PRIMARY KEY(id_aerolinea) 
+);
+
+//tabla aviones
+
+CREATE TABLE aviones(
+	id_avion INT NOT NULL AUTO_INCREMENT,
+	num_matricula VARCHAR(30) NOT NULL UNIQUE,
+	capacidad INT(3) NOT NULL,
+	fecha_fabricacion DATE NOT NULL,
+	estado_avion INT NOT NULL,
+	modelo_avion VARCHAR(30) NOT NULL,
+	aerolinea_avion INT NOT NULL,
+	id_modelo_avion INT NOT NULL,
+	PRIMARY KEY(id_avion),
+	FOREIGN KEY (estado_avion) REFERENCES estado (id_estado),
+	FOREIGN KEY (aerolinea_avion) REFERENCES aerolineas (id_aerolinea),
+	FOREIGN KEY (id_modelo_avion) REFERENCES modelos (id_modelo)	
+);
+
+//tabla rol tripulacion
+
+CREATE TABLE roles(
+	id_rol INT NOT NULL AUTO_INCREMENT,
+	nombre_rol VARCHAR(30) NOT NULL,
+	PRIMARY KEY (id_rol)
+);
+
+
+//tabla empleado
+
+CREATE TABLE empleados(
+	id_empleado INT NOT NULL AUTO_INCREMENT,
+	nombre_empleado VARCHAR(30) NOT NULL,
+	rol_empleado INT NOT NULL,
+	fecha_ingreso DATE NOT NULL,
+	aerolinea_empleado INT NOT NULL,
+	aeropuerto_empleado VARCHAR(5) NOT NULL,
+	PRIMARY KEY(id_empleado),
+	FOREIGN KEY (rol_empleado) REFERENCES roles (id_rol),
+	FOREIGN KEY (aerolinea_empleado) REFERENCES aerolineas (id_aerolinea),
+	FOREIGN KEY (aeropuerto_empleado) REFERENCES aeropuerto (id_aeropuerto)
+);
+
+//tabla escala 
+CREATE TABLE escalas (
+    id_escala INT NOT NULL AUTO_INCREMENT,
+    trayecto_escala INT NOT NULL,
+    avion_escala INT NOT NULL,
+    num_vuelo INT NOT NULL,
+    aeropuerto_escala VARCHAR(5) NOT NULL,
+    PRIMARY KEY (id_escala),
+    FOREIGN KEY (trayecto_escala) REFERENCES trayectos (id_trayecto),
+    FOREIGN KEY (avion_escala) REFERENCES aviones (id_avion),
+    FOREIGN KEY (aeropuerto_escala) REFERENCES aeropuerto (id_aeropuerto)
+);
+
+
+//tabla Trayecto Tripulación 
+
+CREATE TABLE tripulacion(
+	empleado_tripulacion INT NOT NULL,
+	escala_tripulacion INT NOT NULL,
+	FOREIGN KEY (empleado_tripulacion) REFERENCES empleados (id_empleado),
+	FOREIGN KEY (escala_tripulacion) REFERENCES escalas (id_escala)
+);
+
+//tabla tipo de documento 
+
+CREATE TABLE documento(
+	id_documento INT NOT NULL AUTO_INCREMENT,
+	nombre_documento VARCHAR(30) NOT NULL,
+	PRIMARY KEY(id_documento)
+);
+
+//tabla clientes
+
+CREATE TABLE clientes(
+	id_cliente VARCHAR(20) NOT NULL,
+	edad INT NOT NULL,
+	documento_cliente INT NOT NULL,
+	PRIMARY KEY (id_cliente),
+	FOREIGN KEY (documento_cliente) REFERENCES documento (id_documento)
+);
+
+//tabla tarifa
+
+CREATE TABLE tarifas(
+	id_tarifa INT NOT NULL,
+	descripcion_tarifa VARCHAR(50) NOT NULL,
+	valor DOUBLE NOT NULL, 
+	PRIMARY KEY(id_tarifa)
+);
+
+
+//tabla dettalle Reserva 
+
+CREATE TABLE detalle_reserva(
+	id_detalle_reserva INT NOT NULL AUTO_INCREMENT,
+	cliente_reserva VARCHAR(20) NOT NULL,
+	tarifa_reserva INT NOT NULL,
+	valor_reserva DOUBLE NOT NULL,
+	PRIMARY KEY(id_detalle_reserva),
+	FOREIGN KEY (cliente_reserva) REFERENCES clientes (id_cliente),
+	FOREIGN KEY (tarifa_reserva) REFERENCES tarifas (id_tarifa)
+);
+
+
+//tabla reserva Viaje
+
+CREATE TABLE reserva_viaje(
+	id_reserva_viaje INT NOT NULL AUTO_INCREMENT,
+	fecha DATE NOT NULL,
+	trayecto_viaje INT NOT NULL,
+	PRIMARY KEY(id_reserva_viaje),
+	FOREIGN KEY (trayecto_viaje) REFERENCES trayectos (id_trayecto)
+);
+
+//tabla revisión
+
+CREATE TABLE revision(
+	id_revision INT NOT NULL,
+	fecha_revision DATE NOT NULL,
+	avion_revision INT NOT NULL,
+	PRIMARY KEY(id_revision),
+	FOREIGN KEY (avion_revision) REFERENCES aviones (id_avion)
+);
+
+//tabla detalle revision
+
+CREATE TABLE detalle_revision(
+	id_revision_detalle INT NOT NULL,
+	descripcion VARCHAR(50) NOT NULL,
+	fecha_revision DATE NOT NULL,
+	empleado_revision INT NOT NULL, 
+	PRIMARY KEY(id_revision_detalle),
+	FOREIGN KEY (id_revision_detalle) REFERENCES revision (id_revision),
+	FOREIGN KEY (empleado_revision) REFERENCES empleados (id_empleado)	
+);
+
+//tabla reven_empleado
+
+CREATE TABLE rev_empleado(
+	empleado_rev INT NOT NULL,
+	id_rev_empleado INT NOT NULL,
+	FOREIGN KEY (empleado_rev ) REFERENCES empleados (id_empleado),
+	FOREIGN KEY (id_rev_empleado) REFERENCES revision (id_revision)
+);
+
